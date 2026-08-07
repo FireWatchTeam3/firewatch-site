@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FireWatch Sentinel — BRDG Team 3</title>
+<meta name="description" content="FireWatch Sentinel: acoustic and environmental sensing for pre-ignition wildfire risk monitoring. A BRDG Innovation Challenge student prototype.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --bark:        #16241C;   /* near-black forest floor, headings on light */
+  --canopy:      #1B4332;   /* deep forest green — primary */
+  --moss:        #52796F;   /* secondary green */
+  --lichen:      #8FB08A;   /* soft accent green */
+  --ember:       #E8622C;   /* primary orange accent */
+  --amber:       #F2A65A;   /* warm secondary orange */
+  --parchment:   #F7F4EC;   /* warm off-white background */
+  --parchment-dim:#EFEAE0;
+  --paper:       #FFFFFF;
+  --ink:         #1C2321;
+  --ink-soft:    #4B564F;
+  --line:        #DAD4C4;
+  --gold-glow:   #FFC98B;
+  --danger:      #C0392B;
+  --shadow-sm: 0 2px 10px rgba(22,36,28,0.06);
+  --shadow-md: 0 10px 30px rgba(22,36,28,0.10);
+  --shadow-lg: 0 24px 60px rgba(22,36,28,0.16);
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --ff-display: 'Fraunces', serif;
+  --ff-body: 'Inter', sans-serif;
+  --ff-mono: 'JetBrains Mono', monospace;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+body{
+  margin:0;
+  font-family:var(--ff-body);
+  background:var(--parchment);
+  color:var(--ink);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%; display:block;}
+a{color:inherit;}
+h1,h2,h3,h4{font-family:var(--ff-display); color:var(--bark); margin:0 0 .5em; line-height:1.1; font-weight:600;}
+p{margin:0 0 1em;}
+.container{max-width:1180px; margin:0 auto; padding:0 28px;}
+section{position:relative; padding:110px 0;}
+.section-tight{padding:90px 0;}
+.eyebrow{
+  font-family:var(--ff-mono);
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  font-size:.72rem;
+  color:var(--ember);
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:14px;
+}
+.eyebrow::before{
+  content:'';
+  width:7px;height:7px;border-radius:50%;
+  background:var(--ember);
+  box-shadow:0 0 0 4px rgba(232,98,44,.18);
+}
+.section-head{max-width:680px; margin-bottom:56px;}
+.section-head.center{margin-left:auto; margin-right:auto; text-align:center;}
+.lede{font-size:1.1rem; color:var(--ink-soft);}
+:focus-visible{outline:3px solid var(--ember); outline-offset:3px; border-radius:4px;}
+
+/* Buttons */
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:14px 26px;
+  border-radius:100px;
+  font-family:var(--ff-body); font-weight:600; font-size:.95rem;
+  text-decoration:none; cursor:pointer; border:2px solid transparent;
+  transition:transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn-primary{background:var(--ember); color:#fff; box-shadow:0 8px 22px rgba(232,98,44,.35);}
+.btn-primary:hover{background:#d1541f; box-shadow:0 12px 28px rgba(232,98,44,.45);}
+.btn-ghost{background:rgba(255,255,255,.08); color:#fff; border-color:rgba(255,255,255,.55);}
+.btn-ghost:hover{background:rgba(255,255,255,.18);}
+.btn-outline{background:transparent; color:var(--canopy); border-color:var(--canopy);}
+.btn-outline:hover{background:var(--canopy); color:#fff;}
+.btn-sm{padding:9px 16px; font-size:.82rem;}
+
+/* ============ NAV ============ */
+.navbar{
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  background:rgba(247,244,236,0);
+  backdrop-filter:blur(0px);
+  transition:background .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+  padding:18px 0;
+}
+.navbar.scrolled{
+  background:rgba(247,244,236,.92);
+  backdrop-filter:blur(10px);
+  box-shadow:0 4px 24px rgba(22,36,28,.08);
+  padding:12px 0;
+}
+.navbar .container{display:flex; align-items:center; justify-content:space-between; gap:20px;}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--ff-display); font-weight:600; font-size:1.15rem;
+  color:var(--nav-ink, var(--paper)); text-decoration:none;
+  transition:color .35s ease;
+}
+.navbar.scrolled .brand{color:var(--bark);}
+.brand .pulse-dot{
+  width:11px;height:11px;border-radius:50%;
+  background:var(--ember);
+  box-shadow:0 0 0 0 rgba(232,98,44,.55);
+  animation:navpulse 2.4s infinite;
+  flex-shrink:0;
+}
+@keyframes navpulse{
+  0%{box-shadow:0 0 0 0 rgba(232,98,44,.55);}
+  70%{box-shadow:0 0 0 10px rgba(232,98,44,0);}
+  100%{box-shadow:0 0 0 0 rgba(232,98,44,0);}
+}
+.nav-links{display:flex; gap:2px; list-style:none; margin:0; padding:0; flex-wrap:wrap;}
+.nav-links a{
+  display:block; padding:9px 13px; border-radius:100px;
+  font-size:.83rem; font-weight:600; text-decoration:none;
+  color:var(--nav-ink, rgba(255,255,255,.86));
+  transition:color .35s ease, background .25s ease;
+  white-space:nowrap;
+}
+.navbar.scrolled .nav-links a{color:var(--ink-soft);}
+.nav-links a:hover{background:rgba(232,98,44,.12); color:var(--ember) !important;}
+.nav-links a.active{background:var(--ember); color:#fff !important;}
+.nav-toggle{display:none; background:none; border:none; cursor:pointer; padding:6px;}
+.nav-toggle span{display:block; width:24px; height:2px; background:var(--paper); margin:5px 0; transition:.3s;}
+.navbar.scrolled .nav-toggle span{background:var(--bark);}
+
+@media (max-width:1080px){
+  .nav-links{
+    position:fixed; top:0; right:-100%; height:100vh; width:min(320px,80vw);
+    background:var(--parchment); flex-direction:column; padding:100px 28px 28px;
+    box-shadow:-10px 0 40px rgba(0,0,0,.2); transition:right .35s ease; gap:6px;
+  }
+  .nav-links.open{right:0;}
+  .nav-links a{color:var(--ink) !important; padding:12px 16px;}
+  .nav-toggle{display:block;}
+}
+
+/* ============ HERO ============ */
+.hero{
+  min-height:100vh; display:flex; align-items:center; position:relative;
+  overflow:hidden; padding-top:120px;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(242,166,90,.16), transparent 55%),
+    linear-gradient(180deg, #0E1B13 0%, #16281D 45%, #1B4332 100%);
+}
+.hero-forest{position:absolute; inset:0; z-index:0;}
+.hero-forest svg{width:100%; height:100%; display:block;}
+.hero .container{position:relative; z-index:3;}
+.hero-content{max-width:760px;}
+.hero h1{
+  font-size:clamp(2.8rem, 7vw, 5.4rem);
+  color:#fff; letter-spacing:-.01em; margin-bottom:.28em;
+}
+.hero h1 em{font-style:italic; color:var(--amber);}
+.hero .subtitle{
+  font-family:var(--ff-body); font-weight:600; font-size:clamp(1.1rem,2.2vw,1.4rem);
+  color:var(--lichen); margin-bottom:22px; max-width:620px;
+}
+.hero .intro{color:rgba(255,255,255,.82); font-size:1.03rem; max-width:600px; margin-bottom:38px;}
+.hero-ctas{display:flex; gap:16px; flex-wrap:wrap;}
+.scroll-cue{
+  position:absolute; bottom:34px; left:50%; transform:translateX(-50%); z-index:3;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  color:rgba(255,255,255,.6); font-family:var(--ff-mono); font-size:.7rem; letter-spacing:.1em;
+}
+.scroll-cue .line{width:1px; height:34px; background:linear-gradient(180deg, rgba(255,255,255,.7), transparent); animation:scrolldrop 1.8s infinite;}
+@keyframes scrolldrop{0%{opacity:0; transform:scaleY(0.3); transform-origin:top;} 40%{opacity:1; transform:scaleY(1); transform-origin:top;} 100%{opacity:0; transform:scaleY(1); transform-origin:bottom;}}
+
+/* floating leaves */
+.leaf{position:absolute; opacity:.55; animation:leafDrift linear infinite;}
+@keyframes leafDrift{
+  0%{transform:translateY(-10vh) translateX(0) rotate(0deg); opacity:0;}
+  10%{opacity:.5;}
+  90%{opacity:.4;}
+  100%{transform:translateY(110vh) translateX(60px) rotate(220deg); opacity:0;}
+}
+
+/* ============ GENERIC CARD ============ */
+.card{
+  background:var(--paper); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-sm); border:1px solid var(--line);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+
+/* ============ TEAM ============ */
+.team-section{background:var(--paper);}
+.team-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  gap:26px;
+}
+.team-card{
+  padding:30px 26px 26px; text-align:left; cursor:default;
+  position:relative; overflow:hidden;
+}
+.team-card:hover{transform:translateY(-8px) rotate(-0.3deg); box-shadow:var(--shadow-lg);}
+.team-card::before{
+  content:''; position:absolute; top:-60px; right:-60px; width:140px; height:140px;
+  border-radius:50%; background:radial-gradient(circle, rgba(232,98,44,.10), transparent 70%);
+  transition:transform .4s ease;
+}
+.team-card:hover::before{transform:scale(1.3);}
+.avatar-wrap{
+  width:88px; height:88px; border-radius:50%; margin-bottom:18px;
+  background:linear-gradient(160deg, var(--lichen), var(--moss));
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:inset 0 -6px 14px rgba(0,0,0,.12);
+  transition:transform .35s ease;
+}
+.team-card:hover .avatar-wrap{transform:scale(1.06) rotate(3deg);}
+.avatar-wrap svg{width:100%; height:100%;}
+.team-card h3{font-size:1.18rem; margin-bottom:2px;}
+.role-tag{
+  display:inline-block; font-family:var(--ff-mono); font-size:.72rem; font-weight:600;
+  color:var(--ember); background:rgba(232,98,44,.09); padding:4px 10px; border-radius:100px;
+  margin-bottom:14px; letter-spacing:.02em;
+}
+.team-card p.bio{color:var(--ink-soft); font-size:.92rem; margin-bottom:12px;}
+.contribution{
+  font-size:.85rem; background:var(--parchment); border-left:3px solid var(--lichen);
+  padding:10px 12px; border-radius:6px; color:var(--bark); margin-bottom:16px;
+}
+.contribution strong{color:var(--moss); display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px; font-family:var(--ff-mono);}
+.card-links{display:flex; gap:10px;}
+.icon-btn{
+  display:inline-flex; align-items:center; gap:6px; font-size:.78rem; font-weight:600;
+  padding:8px 13px; border-radius:100px; border:1.5px solid var(--line); text-decoration:none;
+  color:var(--ink-soft); transition:.25s;
+}
+.icon-btn:hover{border-color:var(--ember); color:var(--ember); background:rgba(232,98,44,.06);}
+
+/* coaches */
+.coach-strip{
+  margin-top:64px; padding-top:48px; border-top:1px dashed var(--line);
+}
+.coach-strip .strip-head{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:26px;}
+.coach-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:20px;}
+.coach-card{
+  display:flex; align-items:center; gap:14px; padding:18px 20px;
+  background:var(--parchment); border-radius:var(--radius-sm); border:1px solid var(--line);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.coach-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-md);}
+.coach-avatar{
+  width:52px; height:52px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(160deg, var(--amber), var(--ember));
+  display:flex; align-items:center; justify-content:center;
+}
+.coach-avatar svg{width:100%; height:100%;}
+.coach-name{font-weight:700; font-size:.96rem; color:var(--bark);}
+.coach-role{font-size:.78rem; color:var(--ink-soft); font-family:var(--ff-mono);}
+
+/* ============ MISSION ============ */
+.mission-section{
+  background:linear-gradient(180deg, var(--canopy), #12301F);
+  color:#EFEFE8; position:relative; overflow:hidden;
+}
+.mission-section::after{
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(circle at 85% 20%, rgba(242,166,90,.14), transparent 45%);
+}
+.mission-inner{position:relative; z-index:2; max-width:840px; margin:0 auto; text-align:center;}
+.mission-inner .eyebrow{color:var(--amber);}
+.mission-statement{
+  font-family:var(--ff-display); font-size:clamp(1.5rem,3.4vw,2.3rem); font-weight:500;
+  line-height:1.35; color:#fff; margin-bottom:28px;
+}
+.mission-statement .hl{color:var(--amber); font-style:italic;}
+.mission-sub{color:rgba(255,255,255,.78); font-size:1.02rem; max-width:640px; margin:0 auto;}
+.support-pill{
+  display:inline-flex; align-items:center; gap:10px; margin-top:34px;
+  padding:12px 22px; border-radius:100px; background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18); font-size:.85rem; color:#fff;
+}
+
+/* ============ DIFFERENT ============ */
+.diff-compare{
+  display:grid; grid-template-columns:1fr auto 1fr; gap:26px; align-items:stretch; margin-bottom:60px;
+}
+.compare-card{border-radius:var(--radius-md); padding:32px 28px; position:relative;}
+.compare-card.old{background:var(--parchment-dim); border:1px solid var(--line);}
+.compare-card.new{background:var(--canopy); color:#fff;}
+.compare-card .tag{font-family:var(--ff-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; display:block;}
+.compare-card.old .tag{color:var(--ink-soft);}
+.compare-card.new .tag{color:var(--amber);}
+.compare-card h4{font-size:1.3rem;}
+.compare-card.new h4{color:#fff;}
+.compare-arrow{
+  display:flex; align-items:center; justify-content:center; color:var(--ember);
+}
+.compare-arrow svg{width:34px; height:34px;}
+@media (max-width:780px){.diff-compare{grid-template-columns:1fr;} .compare-arrow{transform:rotate(90deg); margin:0 auto;}}
+
+.diff-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px;}
+.diff-item{
+  padding:22px; border-radius:var(--radius-sm); background:var(--paper); border:1px solid var(--line);
+  display:flex; gap:14px; align-items:flex-start; transition:.3s;
+}
+.diff-item:hover{border-color:var(--ember); transform:translateY(-3px); box-shadow:var(--shadow-sm);}
+.diff-icon{
+  width:38px; height:38px; border-radius:10px; background:rgba(82,121,111,.14);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--moss);
+}
+.diff-icon svg{width:20px; height:20px;}
+.diff-item h5{margin:0 0 4px; font-family:var(--ff-body); font-size:.95rem; color:var(--bark); font-weight:700;}
+.diff-item p{margin:0; font-size:.86rem; color:var(--ink-soft);}
+
+.limits-note{
+  margin-top:44px; padding:18px 22px; border-radius:var(--radius-sm);
+  background:rgba(232,98,44,.07); border:1px solid rgba(232,98,44,.25);
+  font-size:.9rem; color:var(--bark); display:flex; gap:12px; align-items:flex-start;
+}
+.limits-note svg{width:22px; height:22px; flex-shrink:0; color:var(--ember); margin-top:2px;}
+
+/* ============ SENSORS / FLIP CARDS ============ */
+.sense-section{background:var(--paper);}
+.sensor-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:26px;}
+.flip-card{perspective:1400px; height:300px;}
+.flip-inner{
+  position:relative; width:100%; height:100%; transition:transform .7s cubic-bezier(.4,.2,.2,1);
+  transform-style:preserve-3d; border-radius:var(--radius-md); cursor:pointer;
+}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{
+  position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden;
+  border-radius:var(--radius-md); padding:26px; display:flex; flex-direction:column;
+}
+.flip-front{
+  background:linear-gradient(160deg, var(--canopy), #0F2A1B); color:#fff;
+  justify-content:space-between; box-shadow:var(--shadow-md);
+}
+.flip-front .sensor-icon{width:46px; height:46px; color:var(--amber); margin-bottom:auto;}
+.flip-front .sensor-icon svg{width:100%; height:100%;}
+.flip-front h4{color:#fff; font-size:1.15rem; margin-bottom:4px;}
+.flip-front .hint{font-family:var(--ff-mono); font-size:.68rem; color:rgba(255,255,255,.55); letter-spacing:.06em;}
+.flip-back{
+  background:var(--paper); border:1.5px solid var(--line); transform:rotateY(180deg);
+  overflow-y:auto; box-shadow:var(--shadow-md);
+}
+.flip-back h4{font-size:1.02rem; margin-bottom:8px; color:var(--ember);}
+.flip-back p{font-size:.82rem; color:var(--ink-soft); margin-bottom:8px;}
+.flip-meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:auto;}
+.meta-chip{
+  font-family:var(--ff-mono); font-size:.65rem; padding:4px 8px; border-radius:100px;
+  background:var(--parchment); border:1px solid var(--line); color:var(--ink-soft);
+}
+.meta-chip.status-established{background:rgba(82,121,111,.14); color:var(--moss); border-color:transparent;}
+.meta-chip.status-experimental{background:rgba(232,98,44,.12); color:var(--ember); border-color:transparent;}
+.flip-card-caption{text-align:center; margin-top:36px; color:var(--ink-soft); font-size:.85rem;}
+
+/* ============ TIMELINE ============ */
+.journey-section{background:var(--parchment-dim);}
+.timeline-track{position:relative;}
+.timeline-track::before{
+  content:''; position:absolute; left:22px; top:6px; bottom:6px; width:2px;
+  background:repeating-linear-gradient(180deg, var(--line) 0 8px, transparent 8px 14px);
+}
+@media(min-width:860px){.timeline-track::before{left:50%; margin-left:-1px;}}
+.tl-item{position:relative; padding-left:64px; margin-bottom:34px;}
+@media(min-width:860px){
+  .tl-item{width:50%; padding-left:0; padding-right:0; margin-bottom:44px;}
+  .tl-item:nth-child(odd){padding-right:56px; text-align:right; margin-left:0;}
+  .tl-item:nth-child(even){padding-left:56px; margin-left:50%;}
+}
+.tl-dot{
+  position:absolute; left:14px; top:6px; width:18px; height:18px; border-radius:50%;
+  background:var(--paper); border:3px solid var(--ember); z-index:2;
+}
+@media(min-width:860px){
+  .tl-item:nth-child(odd) .tl-dot{left:auto; right:-9px;}
+  .tl-item:nth-child(even) .tl-dot{left:-9px;}
+}
+.tl-card{
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:20px 22px; box-shadow:var(--shadow-sm); transition:transform .3s ease, box-shadow .3s ease;
+}
+.tl-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-md);}
+.tl-phase-num{font-family:var(--ff-mono); font-size:.7rem; color:var(--moss); letter-spacing:.08em;}
+.tl-card h4{font-size:1.05rem; margin:4px 0 8px;}
+.tl-card p{font-size:.86rem; color:var(--ink-soft); margin-bottom:10px;}
+.status-pill{
+  display:inline-flex; align-items:center; gap:6px; font-family:var(--ff-mono); font-size:.68rem;
+  font-weight:600; padding:4px 10px; border-radius:100px; letter-spacing:.03em;
+}
+.status-pill::before{content:''; width:6px; height:6px; border-radius:50%;}
+.status-completed{background:rgba(82,121,111,.15); color:var(--moss);}
+.status-completed::before{background:var(--moss);}
+.status-progress{background:rgba(242,166,90,.18); color:#B5741A;}
+.status-progress::before{background:var(--amber);}
+.status-testing{background:rgba(143,176,138,.2); color:#3E6B3E;}
+.status-testing::before{background:var(--lichen);}
+.status-planned{background:rgba(28,35,33,.06); color:var(--ink-soft);}
+.status-planned::before{background:var(--ink-soft);}
+.tl-fields{font-size:.76rem; color:var(--ink-soft); border-top:1px dashed var(--line); margin-top:10px; padding-top:10px;}
+
+/* ============ SYSTEM DESIGN ============ */
+.system-section{background:var(--paper);}
+.arch-flow{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:0;
+  margin-bottom:60px; padding:34px 20px; background:linear-gradient(160deg,#0F2A1B, var(--canopy));
+  border-radius:var(--radius-lg); position:relative; overflow:hidden;
+}
+.arch-flow::before{
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(circle at 15% 85%, rgba(242,166,90,.15), transparent 45%);
+}
+.arch-node{
+  position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding:14px 16px; text-align:center; width:130px;
+}
+.arch-node .node-icon{
+  width:52px; height:52px; border-radius:14px; background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center;
+  color:var(--amber); transition:transform .3s;
+}
+.arch-node:hover .node-icon{transform:translateY(-4px); background:rgba(255,255,255,.18);}
+.arch-node .node-icon svg{width:26px; height:26px;}
+.arch-node span{color:#fff; font-size:.76rem; font-weight:600; line-height:1.25;}
+.arch-arrow{
+  z-index:2; color:var(--ember); flex-shrink:0; width:26px; display:flex; align-items:center; justify-content:center;
+  animation:archPulse 2.2s infinite;
+}
+@keyframes archPulse{0%,100%{opacity:.5;} 50%{opacity:1;}}
+.arch-arrow svg{width:22px; height:22px;}
+
+.components-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; margin-bottom:50px;}
+.comp-card{
+  background:var(--parchment); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:16px 18px; display:flex; gap:12px; align-items:center; font-size:.86rem; font-weight:600; color:var(--bark);
+  transition:.25s;
+}
+.comp-card:hover{border-color:var(--moss); transform:translateY(-3px);}
+.comp-num{
+  font-family:var(--ff-mono); font-size:.7rem; color:var(--ember); width:26px; height:26px; border-radius:50%;
+  border:1.5px solid var(--ember); display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.deploy-note{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;
+}
+.deploy-card{background:var(--parchment); border-left:4px solid var(--moss); padding:20px 22px; border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+.deploy-card h5{margin:0 0 6px; font-size:.95rem; color:var(--bark);}
+.deploy-card p{font-size:.85rem; color:var(--ink-soft); margin:0;}
+
+/* ============ SIMULATION ============ */
+.sim-section{background:linear-gradient(180deg,#101E14,#16281D); color:#fff;}
+.sim-section .section-head h2, .sim-section .eyebrow{color:#fff;}
+.sim-section .eyebrow{color:var(--amber);}
+.sim-section .lede{color:rgba(255,255,255,.72);}
+.sim-badge{
+  display:inline-flex; align-items:center; gap:8px; font-family:var(--ff-mono); font-size:.7rem;
+  background:rgba(232,98,44,.18); color:var(--amber); padding:6px 12px; border-radius:100px; margin-bottom:18px;
+  border:1px solid rgba(242,166,90,.3);
+}
+.sim-layout{display:grid; grid-template-columns:1.1fr 1fr; gap:34px;}
+@media(max-width:980px){.sim-layout{grid-template-columns:1fr;}}
+.sim-scene{
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:var(--radius-lg);
+  padding:18px; min-height:320px; position:relative; overflow:hidden;
+}
+.sim-scene svg{width:100%; height:auto; display:block;}
+.sim-controls{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:var(--radius-lg); padding:24px;}
+.sim-controls h4{color:#fff; font-size:1rem; margin-bottom:18px;}
+.slider-row{margin-bottom:18px;}
+.slider-row label{
+  display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:8px; color:rgba(255,255,255,.85); font-weight:600;
+}
+.slider-row .val{font-family:var(--ff-mono); color:var(--amber);}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:5px; border-radius:100px; background:rgba(255,255,255,.18); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--ember);
+  cursor:pointer; border:3px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+input[type=range]::-moz-range-thumb{
+  width:18px; height:18px; border-radius:50%; background:var(--ember); cursor:pointer; border:3px solid #fff;
+}
+.readout-grid{
+  margin-top:26px; display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  font-family:var(--ff-mono); font-size:.8rem;
+}
+.readout{
+  background:rgba(0,0,0,.25); border-radius:8px; padding:10px 12px; border:1px solid rgba(255,255,255,.08);
+}
+.readout .k{color:rgba(255,255,255,.55); font-size:.68rem; text-transform:uppercase; letter-spacing:.05em;}
+.readout .v{color:#fff; font-weight:600; font-size:.95rem; margin-top:2px;}
+.risk-banner{
+  margin-top:20px; padding:16px 20px; border-radius:var(--radius-sm);
+  display:flex; align-items:center; gap:14px; font-weight:700; transition:background .4s ease, color .4s ease;
+}
+.risk-dot{width:14px; height:14px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 5px currentColor22;}
+.data-path{
+  margin-top:26px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-family:var(--ff-mono);
+  font-size:.72rem; color:rgba(255,255,255,.6);
+}
+.data-path span.step{background:rgba(255,255,255,.08); padding:5px 9px; border-radius:6px;}
+.serial-window{
+  margin-top:26px; background:#0A130D; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,.12);
+  overflow:hidden;
+}
+.serial-header{
+  display:flex; gap:6px; padding:9px 12px; background:rgba(255,255,255,.05); border-bottom:1px solid rgba(255,255,255,.08);
+}
+.serial-header span{width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.2);}
+.serial-body{
+  font-family:var(--ff-mono); font-size:.72rem; color:#8FE9A0; padding:12px 14px; line-height:1.7;
+  max-height:150px; overflow-y:auto;
+}
+.serial-body .dim{color:rgba(255,255,255,.4);}
+
+/* ============ DASHBOARD PREVIEW ============ */
+.dash-section{background:var(--parchment-dim);}
+.dash-mock{
+  background:var(--paper); border-radius:var(--radius-lg); border:1px solid var(--line); box-shadow:var(--shadow-md);
+  overflow:hidden;
+}
+.dash-topbar{
+  display:flex; justify-content:space-between; align-items:center; padding:16px 24px;
+  background:var(--canopy); color:#fff;
+}
+.dash-topbar .title{font-family:var(--ff-mono); font-size:.82rem; font-weight:600; letter-spacing:.03em;}
+.dash-topbar .sim-tag{font-family:var(--ff-mono); font-size:.65rem; background:rgba(255,255,255,.15); padding:4px 10px; border-radius:100px;}
+.dash-body{padding:26px; display:grid; grid-template-columns:1.3fr 1fr; gap:22px;}
+@media(max-width:900px){.dash-body{grid-template-columns:1fr;}}
+.dash-stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:18px;}
+.dash-stat{background:var(--parchment); border-radius:10px; padding:12px 14px; border:1px solid var(--line);}
+.dash-stat .k{font-size:.68rem; color:var(--ink-soft); font-family:var(--ff-mono); text-transform:uppercase;}
+.dash-stat .v{font-size:1.05rem; font-weight:700; color:var(--bark); margin-top:2px;}
+.dash-graph{
+  height:110px; border-radius:10px; border:1px solid var(--line); background:var(--paper);
+  display:flex; align-items:flex-end; gap:4px; padding:10px; margin-bottom:18px;
+}
+.dash-graph .bar{flex:1; background:linear-gradient(180deg, var(--amber), var(--ember)); border-radius:3px 3px 0 0; opacity:.85;}
+.dash-alert{
+  background:rgba(192,57,43,.07); border:1px solid rgba(192,57,43,.25); border-radius:10px;
+  padding:16px 18px; font-size:.86rem; color:var(--bark);
+}
+.dash-alert strong{color:var(--danger); display:block; margin-bottom:4px; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; font-family:var(--ff-mono);}
+.dash-side .risk-legend{display:flex; flex-direction:column; gap:8px; margin-bottom:18px;}
+.legend-row{display:flex; align-items:center; gap:10px; font-size:.82rem; color:var(--ink-soft);}
+.legend-row .dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+.map-placeholder{
+  height:150px; border-radius:10px; border:1px dashed var(--line); background:var(--parchment);
+  display:flex; align-items:center; justify-content:center; color:var(--ink-soft); font-size:.78rem;
+  font-family:var(--ff-mono); text-align:center; padding:10px;
+}
+
+/* ============ VIDEO ============ */
+.video-section{background:var(--paper);}
+.video-frame{
+  background:linear-gradient(160deg,#0F2A1B,var(--canopy)); border-radius:var(--radius-lg);
+  aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+  box-shadow:var(--shadow-lg);
+}
+.video-frame::before{content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 25%, rgba(242,166,90,.18), transparent 50%);}
+.play-btn{
+  position:relative; z-index:2; width:78px; height:78px; border-radius:50%; background:rgba(255,255,255,.14);
+  border:2px solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:transform .3s ease, background .3s ease;
+}
+.play-btn:hover{transform:scale(1.08); background:rgba(255,255,255,.22);}
+.play-btn svg{width:26px; height:26px; color:#fff; margin-left:4px;}
+.video-caption{position:absolute; bottom:20px; left:24px; z-index:2; color:rgba(255,255,255,.8); font-family:var(--ff-mono); font-size:.75rem;}
+.video-meta{margin-top:22px; display:flex; gap:26px; flex-wrap:wrap; font-size:.85rem; color:var(--ink-soft);}
+.video-meta strong{color:var(--bark); display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; font-family:var(--ff-mono); margin-bottom:3px;}
+
+/* ============ UPDATES ============ */
+.updates-section{background:var(--parchment-dim);}
+.updates-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:22px;}
+.update-card{overflow:hidden;}
+.update-card:hover{transform:translateY(-5px); box-shadow:var(--shadow-md);}
+.update-thumb{
+  height:130px; background:linear-gradient(135deg, var(--lichen), var(--moss)); position:relative;
+  display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.85);
+}
+.update-thumb svg{width:34px; height:34px;}
+.update-body{padding:20px 22px;}
+.update-phase{font-family:var(--ff-mono); font-size:.68rem; color:var(--ember); text-transform:uppercase; letter-spacing:.05em;}
+.update-date{font-size:.75rem; color:var(--ink-soft); margin-bottom:6px;}
+.update-body h4{font-size:1.02rem; margin-bottom:6px;}
+.update-body p{font-size:.85rem; color:var(--ink-soft); margin:0;}
+
+/* ============ FEEDBACK FORM ============ */
+.feedback-section{background:var(--paper);}
+.form-wrap{
+  background:var(--parchment); border-radius:var(--radius-lg); padding:40px; border:1px solid var(--line);
+}
+@media(max-width:640px){.form-wrap{padding:26px 20px;}}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr;}}
+.field{margin-bottom:18px;}
+.field.full{grid-column:1/-1;}
+.field label{display:block; font-size:.82rem; font-weight:600; margin-bottom:7px; color:var(--bark);}
+.field input[type=text], .field input[type=email], .field textarea, .field select{
+  width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); font-family:var(--ff-body);
+  font-size:.92rem; background:var(--paper); color:var(--ink); transition:border-color .25s;
+}
+.field input:focus, .field textarea:focus, .field select:focus{border-color:var(--ember);}
+.field textarea{resize:vertical; min-height:110px;}
+.interest-tags{display:flex; flex-wrap:wrap; gap:8px;}
+.tag-check{position:relative;}
+.tag-check input{position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; margin:0;}
+.tag-check span{
+  display:inline-block; padding:9px 15px; border-radius:100px; border:1.5px solid var(--line);
+  font-size:.82rem; color:var(--ink-soft); transition:.2s; cursor:pointer;
+}
+.tag-check input:checked + span{background:var(--ember); border-color:var(--ember); color:#fff;}
+.consent-row{display:flex; align-items:flex-start; gap:10px; font-size:.83rem; color:var(--ink-soft); margin-bottom:22px;}
+.consent-row input{margin-top:3px;}
+.privacy-note{
+  display:flex; gap:10px; align-items:flex-start; font-size:.78rem; color:var(--ink-soft);
+  background:var(--paper); border:1px solid var(--line); padding:12px 14px; border-radius:10px; margin-top:20px;
+}
+.privacy-note svg{width:18px; height:18px; color:var(--moss); flex-shrink:0; margin-top:1px;}
+.form-status{margin-top:16px; font-size:.88rem; font-weight:600; display:none;}
+.form-status.show{display:block;}
+.form-status.ok{color:var(--moss);}
+
+/* ============ CONTACT / FOOTER ============ */
+.contact-section{background:linear-gradient(180deg,#12301F, #0C1F14); color:#fff;}
+.contact-section .eyebrow{color:var(--amber);}
+.contact-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:50px;}
+@media(max-width:900px){.contact-grid{grid-template-columns:1fr;}}
+.closing-statement{font-family:var(--ff-display); font-size:1.4rem; font-weight:500; color:#fff; line-height:1.4; margin-bottom:26px;}
+.contact-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px;}
+.contact-list li{display:flex; gap:14px; align-items:center; font-size:.92rem; color:rgba(255,255,255,.85);}
+.contact-list .ic{
+  width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,.08); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; color:var(--amber);
+}
+.contact-list .ic svg{width:18px; height:18px;}
+.contact-list .label{font-family:var(--ff-mono); font-size:.68rem; color:rgba(255,255,255,.45); text-transform:uppercase; display:block;}
+.mini-form .field input, .mini-form .field textarea{
+  background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.18); color:#fff;
+}
+.mini-form .field label{color:rgba(255,255,255,.85);}
+.mini-form .field input::placeholder, .mini-form .field textarea::placeholder{color:rgba(255,255,255,.35);}
+.footer-bottom{
+  margin-top:70px; padding-top:26px; border-top:1px solid rgba(255,255,255,.12);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  font-size:.78rem; color:rgba(255,255,255,.5);
+}
+
+/* reveal on scroll */
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+/* small utility */
+.visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="#home" class="brand"><span class="pulse-dot"></span> FireWatch Sentinel</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" data-nav>Home</a></li>
+      <li><a href="#team" data-nav>Meet the Team</a></li>
+      <li><a href="#mission" data-nav>Our Mission</a></li>
+      <li><a href="#different" data-nav>What Makes Us Different</a></li>
+      <li><a href="#sense" data-nav>What We Sense</a></li>
+      <li><a href="#journey" data-nav>Project Journey</a></li>
+      <li><a href="#system" data-nav>System Design</a></li>
+      <li><a href="#experience" data-nav>Experience FireWatch</a></li>
+      <li><a href="#video" data-nav>Video</a></li>
+      <li><a href="#feedback" data-nav>Share Your Thoughts</a></li>
+      <li><a href="#contact" data-nav>Contact Us</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="home">
+  <div class="hero-forest" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0E1B13"/>
+          <stop offset="100%" stop-color="#1B4332" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#F2A65A" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#F2A65A" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#skyGrad)"/>
+      <!-- distant tree line -->
+      <g opacity="0.35" fill="#0F2A1B">
+        <path d="M0 620 L60 520 L120 620 L150 560 L210 620 L260 500 L330 620 L380 540 L440 620 L500 480 L560 620 L620 550 L690 620 L750 500 L820 620 L880 540 L950 620 L1010 480 L1080 620 L1140 560 L1210 620 L1270 500 L1340 620 L1400 540 L1470 620 L1530 500 L1600 620 L1600 900 L0 900 Z"/>
+      </g>
+      <!-- mid tree line -->
+      <g opacity="0.55" fill="#12301F">
+        <path d="M-50 700 L20 560 L90 700 L140 600 L210 700 L270 540 L350 700 L410 580 L480 700 L540 520 L610 700 L670 580 L740 700 L800 540 L880 700 L940 580 L1010 700 L1070 520 L1150 700 L1210 580 L1280 700 L1340 540 L1420 700 L1480 580 L1560 700 L1620 540 L1680 700 L1680 900 L-50 900 Z"/>
+      </g>
+      <!-- foreground trees -->
+      <g fill="#0A1F14">
+        <path d="M120 900 L120 760 L60 780 L150 640 L100 660 L190 520 L240 660 L190 640 L280 780 L220 760 L220 900 Z"/>
+        <path d="M1420 900 L1420 740 L1350 765 L1460 600 L1400 625 L1500 470 L1560 625 L1500 600 L1610 765 L1540 740 L1540 900 Z"/>
+        <path d="M1520 900 L1520 800 L1470 815 L1545 710 L1505 725 L1570 630 L1615 725 L1575 710 L1650 815 L1600 800 L1600 900 Z" opacity="0.9"/>
+      </g>
+      <!-- sensor glow pulses on a foreground tree -->
+      <circle cx="1500" cy="650" r="6" fill="url(#glow1)">
+        <animate attributeName="r" values="4;16;4" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.9;0.1;0.9" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="1500" cy="650" r="3" fill="#F2A65A"/>
+    </svg>
+  </div>
+
+  <!-- floating leaves -->
+  <svg class="leaf" style="left:8%; width:22px; animation-duration:14s; animation-delay:0s;" viewBox="0 0 24 24" fill="#8FB08A"><path d="M12 2C6 6 4 12 8 18c3 4 8 5 12 4-2-1-4-3-4-6 4 1 7-1 8-5C20 6 15 3 12 2z"/></svg>
+  <svg class="leaf" style="left:22%; width:16px; animation-duration:19s; animation-delay:3s;" viewBox="0 0 24 24" fill="#F2A65A"><path d="M12 2C6 6 4 12 8 18c3 4 8 5 12 4-2-1-4-3-4-6 4 1 7-1 8-5C20 6 15 3 12 2z"/></svg>
+  <svg class="leaf" style="left:65%; width:20px; animation-duration:16s; animation-delay:6s;" viewBox="0 0 24 24" fill="#8FB08A"><path d="M12 2C6 6 4 12 8 18c3 4 8 5 12 4-2-1-4-3-4-6 4 1 7-1 8-5C20 6 15 3 12 2z"/></svg>
+  <svg class="leaf" style="left:80%; width:14px; animation-duration:21s; animation-delay:1.5s;" viewBox="0 0 24 24" fill="#E8622C"><path d="M12 2C6 6 4 12 8 18c3 4 8 5 12 4-2-1-4-3-4-6 4 1 7-1 8-5C20 6 15 3 12 2z"/></svg>
+  <svg class="leaf" style="left:45%; width:18px; animation-duration:17s; animation-delay:9s;" viewBox="0 0 24 24" fill="#8FB08A"><path d="M12 2C6 6 4 12 8 18c3 4 8 5 12 4-2-1-4-3-4-6 4 1 7-1 8-5C20 6 15 3 12 2z"/></svg>
+
+  <div class="container">
+    <div class="hero-content">
+      <p class="eyebrow" style="color:var(--amber);">BRDG Innovation Challenge · Student Prototype</p>
+      <h1>FireWatch <em>Sentinel</em></h1>
+      <p class="subtitle">Detecting vegetation stress before smoke and flames appear.</p>
+      <p class="intro">FireWatch Sentinel is a cost-effective wildfire-risk monitoring prototype designed to identify local areas of stressed vegetation before visible signs of smoke or fire appear. It combines environmental conditions, vegetation vibration and acoustic signals, soil conditions, and airborne-particle measurements to help land managers and safety teams identify areas that may need inspection.</p>
+      <div class="hero-ctas">
+        <a href="#system" class="btn btn-primary">Explore Our System</a>
+        <a href="#experience" class="btn btn-ghost">Try the Simulation</a>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"><span class="line"></span>SCROLL</div>
+</header>
+
+<!-- ============ TEAM ============ -->
+<section id="team" class="team-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">BRDG Team 3</p>
+      <h2>Meet the Team</h2>
+      <p class="lede">Four team leaders bringing chemical engineering, biomedical engineering, business, and computer science backgrounds together to test whether low-cost sensing can help flag wildfire risk earlier.</p>
+    </div>
+
+    <div class="team-grid">
+      <!-- Card 1 -->
+      <article class="card team-card reveal">
+        <div class="avatar-wrap">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#3A5A50"/><circle cx="50" cy="42" r="18" fill="#EFE0CB"/><path d="M50 20c-11 0-17 8-17 17 0 3 1 6 2 8 3-2 5-6 5-10 5 4 12 6 19 5 1 3 2 6 1 9 3-3 4-9 3-14-2-9-7-15-13-15z" fill="#2B2320"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#EFE0CB"/></svg>
+        </div>
+        <h3>Shoug Almutairi</h3>
+        <span class="role-tag">Team Leader · Software Developer</span>
+        <p class="bio">Chemical engineering student at SJSU with an interest in pharmaceutical and petroleum applications. Leads the technical direction of FireWatch Sentinel's sensing and dashboard logic.</p>
+        <div class="contribution"><strong>Main Contribution</strong>System design and prototype budget line items — translating sensor requirements into a working bill of materials and architecture.</div>
+        <div class="card-links">
+          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
+          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="card team-card reveal">
+        <div class="avatar-wrap">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#4A6B5E"/><circle cx="50" cy="42" r="18" fill="#E3C7A6"/><path d="M32 38c0-12 8-20 18-20s18 8 18 20c0 2-6 4-6 2 0-10-6-14-12-14s-12 4-12 14c0 2-6 0-6-2z" fill="#241C16"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#E3C7A6"/></svg>
+        </div>
+        <h3>Adhithi Ramalingam</h3>
+        <span class="role-tag">Team Leader · Hardware Developer</span>
+        <p class="bio">Biomedical engineering student at UCI with a focus on medical devices. Brought the early insight into bioacoustics and keeps the team organized against the project timeline.</p>
+        <div class="contribution"><strong>Main Contribution</strong>Risk and concern analysis, plus research on the near- and long-term societal impact of the proposed innovation.</div>
+        <div class="card-links">
+          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
+          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="card team-card reveal">
+        <div class="avatar-wrap">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#5B7A6B"/><circle cx="50" cy="42" r="18" fill="#EAD3B2"/><path d="M31 36c1-11 9-18 19-18s18 7 19 18c-4-4-11-6-19-6s-15 2-19 6z" fill="#171310"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#EAD3B2"/></svg>
+        </div>
+        <h3>Brandon Sweitzer</h3>
+        <span class="role-tag">Team Leader · Business Manager</span>
+        <p class="bio">Business administration and electrical engineering student at CSU Fullerton, focused on energy-industry entrepreneurship. Frames FireWatch Sentinel's customer value and competitive positioning.</p>
+        <div class="contribution"><strong>Main Contribution</strong>Research and reporting on the competitive landscape, cost-benefit framing, and overall report structure.</div>
+        <div class="card-links">
+          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
+          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
+        </div>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="card team-card reveal">
+        <div class="avatar-wrap">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#3E5D52"/><circle cx="50" cy="42" r="18" fill="#F1DDBF"/><path d="M50 21c-12 0-19 9-19 19 0 4 1 7 3 9 1-6 3-11 6-13-1 4 0 8 3 11 0-5 2-9 5-11 1 4 4 7 7 8 2-3 3-7 2-11 3 2 4 6 4 9 2-2 3-6 3-9 0-10-7-19-14-19z" fill="#2A2019"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#F1DDBF"/></svg>
+        </div>
+        <h3>Callissa Uccello</h3>
+        <span class="role-tag">Professional Outreach &amp; Firmware Research</span>
+        <p class="bio">Computer science student at CSULB with a bioinformatics focus. Leads subject-matter-expert outreach and researches firmware approaches for the ESP32 sensor node.</p>
+        <div class="contribution"><strong>Main Contribution</strong>Future goals and expected societal impact research, plus coordination of SME interviews that shaped the prototype.</div>
+        <div class="card-links">
+          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
+          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
+        </div>
+      </article>
+    </div>
+
+    <!-- Coaches -->
+    <div class="coach-strip reveal">
+      <div class="strip-head">
+        <div>
+          <p class="eyebrow" style="margin-bottom:6px;">With thanks to</p>
+          <h3 style="margin:0; font-size:1.4rem;">Our Project Coaches</h3>
+        </div>
+        <p style="max-width:420px; color:var(--ink-soft); font-size:.88rem; margin:0;">FireWatch Sentinel's coaches provided technical guidance, competition experience, and kept the team on pace throughout the BRDG Innovation Challenge.</p>
+      </div>
+      <div class="coach-grid">
+        <div class="coach-card">
+          <div class="coach-avatar"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#E8622C"/><circle cx="50" cy="42" r="17" fill="#FCEFDD"/><path d="M50 22c-10 0-16 7-16 16 0 2 0 4 1 6 2-4 4-8 6-9-1 3 0 7 2 9 1-4 2-8 4-10 1 4 3 7 6 8 1-3 2-6 1-9 2 2 3 5 3 8 1-2 2-4 2-6 0-9-6-13-9-13z" fill="#2A2019"/></svg></div>
+          <div><div class="coach-name">Sneha Ramaiah</div><div class="coach-role">Technical &amp; Competition Coach</div></div>
+        </div>
+        <div class="coach-card">
+          <div class="coach-avatar"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#F2A65A"/><circle cx="50" cy="44" r="17" fill="#E3C7A6"/><path d="M33 40c0-11 8-18 17-18s17 7 17 18c0 2-5 3-5 1 0-9-6-13-12-13s-12 4-12 13c0 2-5 1-5-1z" fill="#241C16"/></svg></div>
+          <div><div class="coach-name">Hector Castaneda</div><div class="coach-role">Team Organization Coach</div></div>
+        </div>
+        <div class="coach-card">
+          <div class="coach-avatar"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#52796F"/><circle cx="50" cy="42" r="17" fill="#EFE0CB"/><path d="M50 23c-10 0-16 7-16 16 0 3 1 5 2 7 3-2 4-6 4-9 4 3 11 5 17 4 1 3 2 5 1 8 3-3 4-8 3-13-2-8-6-13-11-13z" fill="#2B2320"/></svg></div>
+          <div><div class="coach-name">Sami Beaini</div><div class="coach-role">Pace &amp; Deadlines Coach</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MISSION ============ -->
+<section id="mission" class="mission-section">
+  <div class="container">
+    <div class="mission-inner reveal">
+      <p class="eyebrow">Our Mission</p>
+      <p class="mission-statement">Help land managers, utility operators, campuses, parks, forestry teams, and emergency-response organizations identify <span class="hl">vegetation stress</span> and changing environmental conditions before they develop into a serious wildfire threat.</p>
+      <p class="mission-sub">FireWatch Sentinel is intended to support human decision-making, not replace firefighters, researchers, or environmental professionals. Every alert the system produces is a recommendation for a trained person to review — never an automatic action.</p>
+      <span class="support-pill">🛈 Human-in-the-loop by design — the system recommends inspection, it never dispatches, evacuates, or decides on its own.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT MAKES US DIFFERENT ============ -->
+<section id="different">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">What Makes FireWatch Different</p>
+      <h2>Most tools watch for fire. We watch for the conditions that lead to one.</h2>
+      <p class="lede">Cameras, satellites, and smoke sensors are strong at regional risk modeling and active-fire detection. FireWatch Sentinel is built to fill the layer underneath: localized, pre-ignition vegetation stress.</p>
+    </div>
+
+    <div class="diff-compare reveal">
+      <div class="compare-card old">
+        <span class="tag">Traditional Approach</span>
+        <h4>Detect smoke or fire.</h4>
+        <p style="color:var(--ink-soft); font-size:.9rem;">Regional models, satellite thermal anomalies, cameras, and gas sensors are strongest once combustion or smoldering has already begun.</p>
+      </div>
+      <div class="compare-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="compare-card new">
+        <span class="tag">FireWatch Approach</span>
+        <h4>Identify stressed vegetation and dangerous conditions earlier.</h4>
+        <p style="color:rgba(255,255,255,.82); font-size:.9rem;">Acoustic/vibration signals, soil moisture, and environmental readings flag zones worth a human inspection — before visible smoke or flame.</p>
+      </div>
+    </div>
+
+    <div class="diff-grid reveal">
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 16v6M4 12h6M14 12h6"/></svg></div><div><h5>Pre-ignition vegetation stress</h5><p>Focused on the condition of vegetation before ignition, not after.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/></svg></div><div><h5>Tree-level, localized monitoring</h5><p>Watches individual trees or small zones, not just broad regions.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h4l2-7 4 14 2-7h4"/></svg></div><div><h5>Multiple sensor signals</h5><p>Combines readings rather than relying on any single measurement.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h8l-1 8 10-12h-8z"/></svg></div><div><h5>Low-power operation</h5><p>Designed to run for extended periods with minimal energy draw.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v4M5 8l2 2M19 8l-2 2M4 15h16M6 19h12"/></svg></div><div><h5>Solar-powered field deployment</h5><p>Built around a solar panel and rechargeable battery for remote sites.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 0116 0M4 12a8 8 0 008 8M12 8v4l3 2"/></svg></div><div><h5>Remote communication</h5><p>Plans for LoRa and gateway relay so isolated sites can report in.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><div><h5>Human review before action</h5><p>Every alert is a recommendation, reviewed by a trained person.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div><div><h5>Affordable prototype components</h5><p>Built from accessible, budget-conscious hardware.</p></div></div>
+      <div class="diff-item"><div class="diff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 8v8M8 6h8M8 18h8"/></svg></div><div><h5>Expandable sensor nodes</h5><p>Additional nodes can be added as coverage needs grow.</p></div></div>
+    </div>
+
+    <div class="limits-note reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+      <p style="margin:0;"><strong>FireWatch Sentinel does not claim to predict or prevent every wildfire.</strong> It is a risk-monitoring and inspection-support system — a proof of concept that tests whether acoustic and environmental signals can improve local wildfire-risk awareness, not a certified fire-prediction product.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT WE SENSE ============ -->
+<section id="sense" class="sense-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">What FireWatch Senses</p>
+      <h2>Seven signals, read together</h2>
+      <p class="lede">Click or hover any card to flip it and see what the sensor measures, why it matters, and how the ESP32 reads it.</p>
+    </div>
+
+    <div class="sensor-grid" id="sensorGrid"></div>
+    <p class="flip-card-caption reveal">Tap a card on touch devices to flip it back and forth.</p>
+  </div>
+</section>
+
+<!-- ============ PROJECT JOURNEY ============ -->
+<section id="journey" class="journey-section">
+  <div class="container">
+    <div class="section-head center reveal" style="margin-left:auto; margin-right:auto;">
+      <p class="eyebrow">Project Journey</p>
+      <h2>Nine phases, from problem to demonstration</h2>
+      <p class="lede">Each phase is editable by the team — add dates, photographs, results, and contributions as the prototype develops.</p>
+    </div>
+
+    <div class="timeline-track" id="timelineTrack"></div>
+  </div>
+</section>
+
+<!-- ============ SYSTEM DESIGN ============ -->
+<section id="system" class="system-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">System Design</p>
+      <h2>From sensor node to dashboard</h2>
+      <p class="lede">Environmental sensors feed the ESP32, which filters and scores the data, then relays it toward a dashboard a person can act on.</p>
+    </div>
+
+    <div class="arch-flow reveal" role="img" aria-label="Architecture: Environmental sensors to ESP32 to LoRa transmitter to remote gateway to satellite or cellular connection to cloud database to FireWatch dashboard">
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 16v6M4 12h6M14 12h6"/></svg></div><span>Environmental Sensors</span></div>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg></div><span>ESP32 Processing</span></div>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 0116 0M8 15a4 4 0 018 0M12 18v.01"/></svg></div><span>LoRa Transmitter</span></div>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21l7-7M14 4l6 6-9 9-4-4z"/></svg></div><span>Remote Gateway</span></div>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div><span>Satellite / Cellular</span></div>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></div><span>Cloud Database</span></div>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-node"><div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><span>FireWatch Dashboard</span></div>
+    </div>
+
+    <h3 class="reveal" style="font-size:1.3rem; margin-bottom:18px;">Inside a field sensor node</h3>
+    <div class="components-grid reveal">
+      <div class="comp-card"><span class="comp-num">1</span>ESP32 microcontroller</div>
+      <div class="comp-card"><span class="comp-num">2</span>BME280 environmental sensor</div>
+      <div class="comp-card"><span class="comp-num">3</span>Piezoelectric / vibration sensor</div>
+      <div class="comp-card"><span class="comp-num">4</span>Soil-moisture sensor</div>
+      <div class="comp-card"><span class="comp-num">5</span>Particulate-matter sensor</div>
+      <div class="comp-card"><span class="comp-num">6</span>Optional light / UV sensor</div>
+      <div class="comp-card"><span class="comp-num">7</span>LoRa communication module</div>
+      <div class="comp-card"><span class="comp-num">8</span>Solar panel</div>
+      <div class="comp-card"><span class="comp-num">9</span>Rechargeable battery</div>
+      <div class="comp-card"><span class="comp-num">10</span>Battery-management / charging module</div>
+      <div class="comp-card"><span class="comp-num">11</span>Weather-resistant enclosure</div>
+      <div class="comp-card"><span class="comp-num">12</span>Antenna</div>
+      <div class="comp-card"><span class="comp-num">13</span>Local storage / memory backup</div>
+    </div>
+
+    <div class="deploy-note reveal">
+      <div class="deploy-card">
+        <h5>Prototype-stage output</h5>
+        <p>Early builds display readings through the Arduino Serial Monitor while the team validates sensor logic on the bench.</p>
+      </div>
+      <div class="deploy-card">
+        <h5>Field deployment</h5>
+        <p>A full remote deployment transmits data through LoRa to a gateway, keeping power draw low over long stretches outdoors.</p>
+      </div>
+      <div class="deploy-card">
+        <h5>Isolated locations</h5>
+        <p>Where Wi-Fi and cellular service aren't available, the gateway can relay information over a satellite connection.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXPERIENCE FIREWATCH / SIMULATION ============ -->
+<section id="experience" class="sim-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="sim-badge">⬤ Simulation data — no live sensors connected</span>
+      <p class="eyebrow">Experience FireWatch</p>
+      <h2>Move the sliders. Watch the risk level respond.</h2>
+      <p class="lede">This is a simulated park with one FireWatch sensor node. Change the environmental conditions below and see how the ESP32's readings — and the dashboard's risk level — change. Notice that one unusual reading alone won't turn the indicator red.</p>
+    </div>
+
+    <div class="sim-layout reveal">
+      <div class="sim-scene" id="simScene">
+        <svg viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="skyFade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0A1810"/>
+              <stop offset="100%" stop-color="#12291B"/>
+            </linearGradient>
+          </defs>
+          <rect width="560" height="400" fill="url(#skyFade)" rx="14"/>
+
+          <!-- distant forest sketch (many small trees, back layer) -->
+          <g opacity="0.32" fill="#20492F">
+            <path d="M10 190 L28 150 L46 190Z"/><path d="M40 195 L56 158 L72 195Z"/><path d="M70 188 L90 142 L110 188Z"/>
+            <path d="M105 194 L120 160 L135 194Z"/><path d="M140 186 L162 138 L184 186Z"/><path d="M180 192 L196 156 L212 192Z"/>
+            <path d="M215 184 L236 136 L257 184Z"/><path d="M250 190 L266 154 L282 190Z"/><path d="M285 182 L306 134 L327 182Z"/>
+            <path d="M320 188 L336 152 L352 188Z"/><path d="M355 183 L376 136 L397 183Z"/><path d="M390 190 L406 154 L422 190Z"/>
+            <path d="M425 185 L446 138 L467 185Z"/><path d="M460 191 L476 155 L492 191Z"/><path d="M495 183 L516 136 L537 183Z"/>
+            <path d="M525 189 L541 153 L557 189Z"/>
+          </g>
+          <!-- mid forest sketch, slightly larger + closer -->
+          <g opacity="0.5" fill="#1C3E29">
+            <path d="M-10 230 L18 168 L46 230Z"/><path d="M40 236 L66 176 L92 236Z"/><path d="M90 226 L122 158 L154 226Z"/>
+            <path d="M150 234 L178 174 L206 234Z"/><path d="M220 224 L254 154 L288 224Z"/><path d="M290 232 L318 172 L346 232Z"/>
+            <path d="M350 224 L384 154 L418 224Z"/><path d="M410 234 L438 174 L466 234Z"/><path d="M460 226 L492 158 L524 226Z"/>
+            <path d="M510 233 L538 174 L566 233Z"/>
+          </g>
+
+          <!-- ground -->
+          <path d="M0 300 Q280 278 560 300 L560 400 L0 400 Z" fill="#173726"/>
+          <path d="M0 300 Q280 278 560 300" stroke="#254A34" stroke-width="2" fill="none"/>
+
+          <!-- three foreground trees -->
+          <g id="frontTrees">
+            <g transform="translate(90,215)"><rect x="-6" y="70" width="12" height="60" fill="#3B2A20"/><circle cx="0" cy="45" r="50" fill="#2E5B44"/><circle cx="-18" cy="30" r="26" fill="#356A4E" opacity="0.8"/></g>
+            <g transform="translate(465,205)"><rect x="-6" y="78" width="12" height="65" fill="#3B2A20"/><circle cx="0" cy="48" r="54" fill="#2E5B44"/><circle cx="20" cy="34" r="28" fill="#356A4E" opacity="0.8"/></g>
+            <g transform="translate(278,190)" id="sentinelTree"><rect x="-7" y="88" width="14" height="72" fill="#4A3527"/><circle cx="0" cy="55" r="62" fill="#356A4E"/><circle cx="-24" cy="40" r="30" fill="#3E7A58" opacity="0.85"/><circle cx="26" cy="42" r="28" fill="#3E7A58" opacity="0.85"/></g>
+          </g>
+
+          <!-- ground shadow beneath the sensor node -->
+          <ellipse cx="242" cy="298" rx="28" ry="7" fill="#0F2417" opacity="0.6"/>
+
+          <!-- sensor node resting on the ground, at the base of the sentinel tree -->
+          <g transform="translate(242,278)">
+            <rect x="-13" y="0" width="26" height="20" rx="3" fill="#1C2321" stroke="#F2A65A" stroke-width="1.5"/>
+            <circle id="nodePulse" cx="0" cy="10" r="4" fill="#E8622C"/>
+            <circle id="nodePulseRing" cx="0" cy="10" r="4" fill="none" stroke="#F2A65A" stroke-width="1.5"/>
+            <!-- soil probe prongs into the ground -->
+            <line x1="-6" y1="20" x2="-6" y2="32" stroke="#8FB08A" stroke-width="2"/>
+            <line x1="6" y1="20" x2="6" y2="32" stroke="#8FB08A" stroke-width="2"/>
+          </g>
+          <text x="242" y="316" fill="#8FB08A" font-family="JetBrains Mono, monospace" font-size="9" text-anchor="middle">SENSOR NODE · GROUND LEVEL</text>
+
+          <!-- solar panel + battery, mounted at ground level beside the node -->
+          <g transform="translate(300,282)">
+            <rect x="0" y="0" width="30" height="14" rx="2" fill="#274E3C" stroke="#8FB08A" stroke-width="1"/>
+            <line x1="7" y1="0" x2="7" y2="14" stroke="#8FB08A" stroke-width="0.6"/>
+            <line x1="15" y1="0" x2="15" y2="14" stroke="#8FB08A" stroke-width="0.6"/>
+            <line x1="23" y1="0" x2="23" y2="14" stroke="#8FB08A" stroke-width="0.6"/>
+          </g>
+
+          <!-- antenna rising from the ground node, up past the trunk -->
+          <line x1="250" y1="278" x2="268" y2="205" stroke="#F2A65A" stroke-width="2"/>
+          <circle cx="268" cy="205" r="3" fill="#F2A65A"/>
+          <!-- LoRa wave to gateway -->
+          <path d="M272 203 Q345 185 415 175" stroke="#F2A65A" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.85"/>
+
+          <!-- gateway tower -->
+          <g transform="translate(430,150)">
+            <line x1="0" y1="0" x2="0" y2="55" stroke="#DAD4C4" stroke-width="2"/>
+            <line x1="-9" y1="9" x2="9" y2="9" stroke="#DAD4C4" stroke-width="1.5"/>
+            <line x1="-7" y1="0" x2="7" y2="0" stroke="#DAD4C4" stroke-width="1.5"/>
+            <circle cx="0" cy="-4" r="3" fill="#F2A65A"/>
+          </g>
+          <text x="430" y="222" fill="#8FB08A" font-family="JetBrains Mono, monospace" font-size="9" text-anchor="middle">GATEWAY</text>
+
+          <!-- dashboard/computer, foreground -->
+          <g transform="translate(20,320)">
+            <rect x="0" y="0" width="68" height="44" rx="4" fill="#101E14" stroke="#8FB08A" stroke-width="1.2"/>
+            <rect x="6" y="6" width="56" height="24" fill="#173726"/>
+            <rect id="dashBar1" x="10" y="22" width="6" height="6" fill="#8FE9A0"/>
+            <rect id="dashBar2" x="20" y="16" width="6" height="12" fill="#F2A65A"/>
+            <rect id="dashBar3" x="30" y="10" width="6" height="18" fill="#E8622C"/>
+            <rect id="dashBar4" x="40" y="18" width="6" height="10" fill="#8FE9A0"/>
+            <rect x="22" y="34" width="22" height="4" fill="#3B2A20"/>
+          </g>
+          <text x="54" y="380" fill="#8FB08A" font-family="JetBrains Mono, monospace" font-size="9" text-anchor="middle">DASHBOARD</text>
+        </svg>
+      </div>
+
+      <div class="sim-controls">
+        <h4>Environmental controls</h4>
+
+        <div class="slider-row">
+          <label>Temperature <span class="val" id="tempVal">24.0 °C</span></label>
+          <input type="range" id="tempSlider" min="5" max="48" value="24" step="0.5">
+        </div>
+        <div class="slider-row">
+          <label>Humidity <span class="val" id="humVal">55%</span></label>
+          <input type="range" id="humSlider" min="5" max="95" value="55" step="1">
+        </div>
+        <div class="slider-row">
+          <label>Soil Moisture <span class="val" id="soilVal">Moderate</span></label>
+          <input type="range" id="soilSlider" min="0" max="100" value="50" step="1">
+        </div>
+        <div class="slider-row">
+          <label>Particle Concentration <span class="val" id="pmVal">Normal</span></label>
+          <input type="range" id="pmSlider" min="0" max="100" value="15" step="1">
+        </div>
+        <div class="slider-row">
+          <label>Light / UV Level <span class="val" id="uvVal">Moderate</span></label>
+          <input type="range" id="uvSlider" min="0" max="100" value="45" step="1">
+        </div>
+        <div class="slider-row">
+          <label>Vegetation Vibration <span class="val" id="vibVal">Normal</span></label>
+          <input type="range" id="vibSlider" min="0" max="100" value="10" step="1">
+        </div>
+        <div class="slider-row">
+          <label>Wind <span class="val" id="windVal">Calm</span></label>
+          <input type="range" id="windSlider" min="0" max="100" value="20" step="1">
+        </div>
+
+        <div class="readout-grid">
+          <div class="readout"><div class="k">Temperature</div><div class="v" id="rTemp">24.0 °C</div></div>
+          <div class="readout"><div class="k">Humidity</div><div class="v" id="rHum">55%</div></div>
+          <div class="readout"><div class="k">Soil Moisture</div><div class="v" id="rSoil">Moderate</div></div>
+          <div class="readout"><div class="k">Particles</div><div class="v" id="rPm">Normal</div></div>
+          <div class="readout"><div class="k">Vibration Signal</div><div class="v" id="rVib">Normal</div></div>
+          <div class="readout"><div class="k">Node Status</div><div class="v" style="color:#8FE9A0;">Connected</div></div>
+          <div class="readout"><div class="k">Battery Level</div><div class="v" id="rBatt">84%</div></div>
+          <div class="readout"><div class="k">Solar Charging</div><div class="v" id="rSolar">Active</div></div>
+        </div>
+
+        <div class="risk-banner" id="riskBanner" style="background:rgba(143,233,160,.15); color:#8FE9A0;">
+          <span class="risk-dot" id="riskDot" style="background:#8FE9A0;"></span>
+          <span id="riskText">GREEN — Low Risk. Conditions look normal.</span>
+        </div>
+
+        <div class="data-path" aria-hidden="true">
+          <span class="step">Sensor measurement</span>→<span class="step">ESP32 processing</span>→<span class="step">LoRa message</span>→<span class="step">Gateway</span>→<span class="step">Dashboard update</span>
+        </div>
+
+        <div class="serial-window">
+          <div class="serial-header"><span></span><span></span><span></span></div>
+          <div class="serial-body" id="serialBody">
+            <div class="dim">// FireWatch Sentinel — Serial Monitor (simulated)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <details class="reveal" style="margin-top:30px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:var(--radius-md); padding:20px 24px;">
+      <summary style="cursor:pointer; font-weight:700; color:#fff; font-family:var(--ff-mono); font-size:.85rem;">View simulated ESP32 code</summary>
+      <pre style="overflow-x:auto; font-family:var(--ff-mono); font-size:.78rem; color:#8FE9A0; margin-top:14px; line-height:1.7;"><code>void loop() {
+  tempF   = alpha*temp  + (1-alpha)*tempF;      // filter noise
+  humF    = alpha*hum   + (1-alpha)*humF;
+  soilF   = alpha*soilMoisture + (1-alpha)*soilF;
+  pm25F   = alpha*pm25  + (1-alpha)*pm25F;
+  vibF    = alpha*vibration + (1-alpha)*vibF;
+
+  riskScore  = mapRange(tempF, 20, 50, 0, 25);   // heat
+  riskScore += mapRange(humF, 100, 10, 0, 25);   // dryness
+  riskScore += mapRange(vibF, 0, 100, 0, 20);    // stress signal
+  riskScore += mapRange(pm25F, 0, 250, 0, 20);   // smoke/dust
+  riskScore += mapRange(soilF, 100, 0, 0, 10);   // dry soil
+
+  riskLevel = classify(riskScore);  // GREEN / YELLOW / ORANGE / RED
+  sendPacket(jsonBuffer);           // LoRa / Wi-Fi transmission
+}</code></pre>
+    </details>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD PREVIEW ============ -->
+<section class="dash-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Dashboard Preview</p>
+      <h2>What a land manager would see</h2>
+      <p class="lede">A simplified preview of the FireWatch dashboard. Every value shown here is simulation data.</p>
+    </div>
+
+    <div class="dash-mock reveal">
+      <div class="dash-topbar">
+        <span class="title">FIREWATCH DASHBOARD — NODE 03</span>
+        <span class="sim-tag">SIMULATION DATA</span>
+      </div>
+      <div class="dash-body">
+        <div class="dash-main">
+          <div class="dash-stat-grid">
+            <div class="dash-stat"><div class="k">Node ID</div><div class="v">Tree #03</div></div>
+            <div class="dash-stat"><div class="k">Battery</div><div class="v">84%</div></div>
+            <div class="dash-stat"><div class="k">Solar</div><div class="v">Active</div></div>
+            <div class="dash-stat"><div class="k">Comms</div><div class="v">Connected</div></div>
+            <div class="dash-stat"><div class="k">Last Update</div><div class="v">2 min ago</div></div>
+            <div class="dash-stat"><div class="k">Risk Level</div><div class="v" style="color:var(--ember);">Orange</div></div>
+          </div>
+          <div class="dash-graph" aria-label="Historical measurement graph, simulated">
+            <div class="bar" style="height:30%"></div><div class="bar" style="height:42%"></div><div class="bar" style="height:38%"></div>
+            <div class="bar" style="height:55%"></div><div class="bar" style="height:48%"></div><div class="bar" style="height:65%"></div>
+            <div class="bar" style="height:70%"></div><div class="bar" style="height:60%"></div><div class="bar" style="height:78%"></div>
+            <div class="bar" style="height:82%"></div><div class="bar" style="height:74%"></div><div class="bar" style="height:88%"></div>
+          </div>
+          <div class="dash-alert">
+            <strong>⚠ Inspection Recommended</strong>
+            Node 03 has reported low humidity, dry soil, elevated temperature, and abnormal vegetation signals across several readings. Field inspection is recommended.
+          </div>
+        </div>
+        <div class="dash-side">
+          <div class="risk-legend">
+            <div class="legend-row"><span class="dot" style="background:#3E9B57;"></span>Green — Low Risk</div>
+            <div class="legend-row"><span class="dot" style="background:#F2A65A;"></span>Yellow — Moderate Risk</div>
+            <div class="legend-row"><span class="dot" style="background:#E8622C;"></span>Orange — Elevated Risk</div>
+            <div class="legend-row"><span class="dot" style="background:#C0392B;"></span>Red — High Risk</div>
+          </div>
+          <div class="map-placeholder">Map / park view<br>(editable — connect a live or static map here)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIDEO ============ -->
+<section id="video" class="video-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Animated Project Video</p>
+      <h2>See FireWatch in Action</h2>
+      <p class="lede">Space reserved for the team's explanatory video — swap in a YouTube, Vimeo, or locally hosted embed when it's ready.</p>
+    </div>
+    <div class="video-frame reveal">
+      <button class="play-btn" aria-label="Play project video (placeholder)" onclick="return false;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <span class="video-caption">Video placeholder — replace with embed code</span>
+    </div>
+    <div class="video-meta reveal">
+      <div><strong>Description</strong>A short walkthrough of the FireWatch Sentinel prototype, sensing layer, and dashboard.</div>
+      <div><strong>Captions</strong>Captions and a transcript will be provided alongside the final video.</div>
+      <div><strong>Runtime</strong>Placeholder — to be updated.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ UPDATES ============ -->
+<section class="updates-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Updates &amp; Results</p>
+      <h2>Progress from the team</h2>
+      <p class="lede">Editable log for sensor-test results, programming progress, prototype photos, and milestones. Add a new card for each update.</p>
+    </div>
+    <div class="updates-grid">
+      <article class="card update-card reveal">
+        <div class="update-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-4 4-3-3-6 5"/></svg></div>
+        <div class="update-body">
+          <span class="update-phase">Phase 2 · Research &amp; SME Outreach</span>
+          <div class="update-date">July 22, 2026</div>
+          <h4>Deliverable 1 submitted</h4>
+          <p>Completed problem analysis, target-user research, ethics framework, budget, and schedule for the BRDG Innovation Challenge review.</p>
+        </div>
+      </article>
+      <article class="card update-card reveal">
+        <div class="update-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 2 3 14h8l-1 8 10-12h-8z"/></svg></div>
+        <div class="update-body">
+          <span class="update-phase">Phase 3 · Prototype Build</span>
+          <div class="update-date">Upcoming — August 2026</div>
+          <h4>ESP32 sensor node parts ordered</h4>
+          <p>Finalizing the bill of materials and beginning to assemble the first sensor node for controlled bench testing.</p>
+        </div>
+      </article>
+      <article class="card update-card reveal">
+        <div class="update-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8M12 8v8"/></svg></div>
+        <div class="update-body">
+          <span class="update-phase">Phase 4 · Final Demonstration</span>
+          <div class="update-date">Planned — October 2026</div>
+          <h4>BRDG competition presentation</h4>
+          <p>Placeholder for final results, dashboard walkthrough, limitations, and future development plans.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHARE YOUR THOUGHTS ============ -->
+<section id="feedback" class="feedback-section">
+  <div class="container">
+    <div class="section-head center reveal" style="margin-left:auto; margin-right:auto;">
+      <p class="eyebrow">Share Your Thoughts</p>
+      <h2>What Do You Think About FireWatch?</h2>
+      <p class="lede">Feedback from students, professors, judges, and environmental organizations helps us improve the prototype.</p>
+    </div>
+
+    <div class="form-wrap reveal">
+      <form id="feedbackForm" novalidate>
+        <div class="form-grid">
+          <div class="field"><label for="fName">Name</label><input type="text" id="fName" name="name" required></div>
+          <div class="field"><label for="fOrg">Organization or School</label><input type="text" id="fOrg" name="org"></div>
+          <div class="field full"><label for="fEmail">Email Address</label><input type="email" id="fEmail" name="email" required></div>
+          <div class="field full">
+            <label for="fComment">Feedback or Comment</label>
+            <textarea id="fComment" name="comment" required></textarea>
+          </div>
+          <div class="field full">
+            <label>Area of Interest</label>
+            <div class="interest-tags">
+              <label class="tag-check"><input type="checkbox" name="interest" value="Environmental monitoring"><span>Environmental monitoring</span></label>
+              <label class="tag-check"><input type="checkbox" name="interest" value="Wildfire prevention"><span>Wildfire prevention</span></label>
+              <label class="tag-check"><input type="checkbox" name="interest" value="Sensor development"><span>Sensor development</span></label>
+              <label class="tag-check"><input type="checkbox" name="interest" value="Software development"><span>Software development</span></label>
+              <label class="tag-check"><input type="checkbox" name="interest" value="Research collaboration"><span>Research collaboration</span></label>
+              <label class="tag-check"><input type="checkbox" name="interest" value="Sponsorship"><span>Sponsorship</span></label>
+              <label class="tag-check"><input type="checkbox" name="interest" value="General feedback"><span>General feedback</span></label>
+            </div>
+          </div>
+        </div>
+        <label class="consent-row"><input type="checkbox" name="contactOk"> I'm okay with the FireWatch Sentinel team contacting me about this feedback.</label>
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary">Submit Feedback</button>
+          <label class="visually-hidden" for="fHoneypot">Leave this field empty</label>
+          <input type="text" id="fHoneypot" name="company" class="visually-hidden" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="form-status" id="formStatus"></div>
+        <div class="privacy-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+          <span>Submitted feedback is private by default and only visible to the FireWatch Sentinel team. Comments are shown publicly only if the team reviews and approves them for display. This form includes basic spam protection.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<footer id="contact" class="contact-section">
+  <div class="container">
+    <div class="contact-grid">
+      <div>
+        <p class="eyebrow">Contact Us</p>
+        <p class="closing-statement">FireWatch Sentinel is an evolving student prototype. We welcome feedback, technical guidance, research collaboration, and opportunities to test and improve the system.</p>
+        <ul class="contact-list">
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><div><span class="label">Get in Touch</span>Use the form to reach the FireWatch Sentinel team directly.</div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></span><div><span class="label">Program</span>BRDG Innovation Challenge — student team project</div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></span><div><span class="label">Collaboration</span>Open to technical guidance, research partnerships, and pilot opportunities.</div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 0116 0M4 12a8 8 0 008 8M12 8v4l3 2"/></svg></span><div><span class="label">Response Time</span>We aim to reply to every message within a few days.</div></li>
+        </ul>
+      </div>
+      <div class="mini-form">
+        <p class="eyebrow">General Contact Form</p>
+        <form>
+          <div class="field"><label for="cName">Name</label><input type="text" id="cName" placeholder="Your name"></div>
+          <div class="field"><label for="cEmail2">Email</label><input type="email" id="cEmail2" placeholder="you@example.com"></div>
+          <div class="field"><label for="cMsg">Message</label><textarea id="cMsg" placeholder="How can we help?"></textarea></div>
+          <button type="submit" class="btn btn-outline" style="border-color:rgba(255,255,255,.5); color:#fff;" onclick="return handleMiniForm(event)">Send Message</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 FireWatch Sentinel — BRDG Team 3. Student prototype; not a certified wildfire detection system.</span>
+      <span>firewatchBRDG.com</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============ NAV: scroll state, active link, mobile toggle ============ */
+const navbar = document.getElementById('navbar');
+const navLinks = document.querySelectorAll('#navLinks a');
+const sections = document.querySelectorAll('section[id], header[id]');
+
+function onScroll(){
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+  let current = '';
+  sections.forEach(sec=>{
+    const top = sec.offsetTop - 140;
+    if(window.scrollY >= top) current = sec.id;
+  });
+  navLinks.forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href') === '#'+current);
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+const navToggle = document.getElementById('navToggle');
+const navLinksEl = document.getElementById('navLinks');
+navToggle.addEventListener('click', ()=>{
+  const open = navLinksEl.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', open);
+});
+navLinksEl.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=> {
+  navLinksEl.classList.remove('open');
+  navToggle.setAttribute('aria-expanded','false');
+}));
+
+/* ============ REVEAL ON SCROLL ============ */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+}, {threshold:0.12});
+revealEls.forEach(el=>io.observe(el));
+
+/* ============ SENSOR FLIP CARDS ============ */
+const sensors = [
+  {name:"Temperature", status:"established", icon:'<path d="M12 2v12"/><circle cx="12" cy="18" r="4"/><path d="M12 14a2 2 0 012 2"/>', desc:"Tracks changes in local environmental temperature that may contribute to dry and dangerous vegetation conditions.", unit:"°C / °F", esp:"Read via the BME280 over I²C using bme.readTemperature()."},
+  {name:"Humidity", status:"established", icon:'<path d="M12 2s7 8 7 13a7 7 0 01-14 0c0-5 7-13 7-13z"/>', desc:"Measures moisture in the surrounding air. Lower humidity may increase vegetation dryness and fire risk.", unit:"% relative humidity", esp:"Read via the BME280 using bme.readHumidity()."},
+  {name:"Atmospheric Pressure", status:"established", icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>', desc:"Provides additional environmental context and may help identify changing weather conditions.", unit:"hPa", esp:"Read via the BME280 using bme.readPressure()."},
+  {name:"Vegetation Vibration", status:"experimental", icon:'<path d="M3 12h3l2-7 4 14 2-7h3l2 4h2"/>', desc:"A piezoelectric or contact sensor studies physical vibration or acoustic signals from vegetation. This experimental feature must still be validated through testing.", unit:"0–100 stress index", esp:"Read as an analog voltage on a piezo pin via analogRead(PIEZO_PIN)."},
+  {name:"Soil Moisture", status:"established", icon:'<path d="M12 3c-1 3-6 6-6 11a6 6 0 0012 0c0-5-5-8-6-11z"/>', desc:"Measures moisture around vegetation roots and helps identify unusually dry soil.", unit:"% volumetric water content", esp:"Read as an analog voltage via analogRead(SOIL_PIN)."},
+  {name:"Airborne Particles", status:"established", icon:'<circle cx="6" cy="8" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="17" cy="10" r="1.5"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="16" r="1.5"/>', desc:"Measures particulate matter that may indicate dust, pollution, environmental disturbance, or possible early smoke conditions.", unit:"µg/m³ (PM2.5 / PM10)", esp:"Read from a PMS-series sensor over UART (readPM())."},
+  {name:"Light / UV Exposure", status:"established", icon:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>', desc:"Measures sunlight conditions that may contribute to vegetation drying and environmental stress.", unit:"lux / UV index", esp:"Read as an analog voltage via analogRead(LIGHT_PIN)."},
+];
+const sensorGrid = document.getElementById('sensorGrid');
+sensors.forEach(s=>{
+  const card = document.createElement('div');
+  card.className = 'flip-card reveal';
+  card.innerHTML = `
+    <div class="flip-inner">
+      <div class="flip-face flip-front">
+        <div class="sensor-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg></div>
+        <div>
+          <h4>${s.name}</h4>
+          <span class="hint">Click or hover to flip</span>
+        </div>
+      </div>
+      <div class="flip-face flip-back">
+        <h4>${s.name}</h4>
+        <p>${s.desc}</p>
+        <p><strong style="color:var(--bark);">Example units:</strong> ${s.unit}</p>
+        <p><strong style="color:var(--bark);">ESP32 read:</strong> ${s.esp}</p>
+        <div class="flip-meta">
+          <span class="meta-chip status-${s.status}">${s.status === 'established' ? '✓ Established' : '△ Experimental'}</span>
+        </div>
+      </div>
+    </div>`;
+  const inner = card.querySelector('.flip-inner');
+  card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+  card.addEventListener('mouseenter', ()=> card.classList.add('flipped'));
+  card.addEventListener('mouseleave', ()=> card.classList.remove('flipped'));
+  sensorGrid.appendChild(card);
+  io.observe(card);
+});
+
+/* ============ PROJECT JOURNEY TIMELINE ============ */
+const phases = [
+  {n:"Phase 1", title:"Problem Identification", status:"completed", desc:"Research wildfire risks and the limitations of existing monitoring methods.", fields:"Date: May–June 2026 · Team: All"},
+  {n:"Phase 2", title:"Concept Development", status:"completed", desc:"Design a system focused on vegetation stress before visible smoke or flames.", fields:"Date: June 2026 · Team: All"},
+  {n:"Phase 3", title:"Sensor Selection", status:"completed", desc:"Select the ESP32, BME280, piezoelectric sensor, soil-moisture sensor, particle sensor, and optional light sensor.", fields:"Date: June–July 2026 · Owner: Hardware team"},
+  {n:"Phase 4", title:"Prototype Assembly", status:"progress", desc:"Connect the sensors, test wiring, and begin collecting measurements.", fields:"Date: Planned Aug 2026 · Owner: Hardware team"},
+  {n:"Phase 5", title:"C/C++ Programming", status:"progress", desc:"Develop ESP32 code to read sensors, filter data, calculate risk levels, and format information.", fields:"Date: Planned Aug 2026 · Owner: Software team"},
+  {n:"Phase 6", title:"Communication System", status:"planned", desc:"Test local USB serial communication and develop the LoRa communication concept for remote locations.", fields:"Date: Planned Aug–Sep 2026"},
+  {n:"Phase 7", title:"Dashboard Development", status:"planned", desc:"Display measurements, sensor status, historical data, and risk indicators.", fields:"Date: Planned Sep 2026"},
+  {n:"Phase 8", title:"Simulation and Testing", status:"testing", desc:"Test different environmental scenarios and compare sensor responses.", fields:"Date: Planned Sep 2026"},
+  {n:"Phase 9", title:"BRDG Final Demonstration", status:"planned", desc:"Present the working prototype, dashboard, limitations, results, and future development plan.", fields:"Date: Oct 9, 2026"},
+];
+const statusLabel = {completed:"Completed", progress:"In Progress", testing:"Testing", planned:"Planned"};
+const track = document.getElementById('timelineTrack');
+phases.forEach(p=>{
+  const item = document.createElement('div');
+  item.className = 'tl-item reveal';
+  item.innerHTML = `
+    <div class="tl-dot"></div>
+    <div class="tl-card">
+      <span class="tl-phase-num">${p.n}</span>
+      <h4>${p.title}</h4>
+      <span class="status-pill status-${p.status}">${statusLabel[p.status]}</span>
+      <p style="margin-top:10px;">${p.desc}</p>
+      <div class="tl-fields">${p.fields} · Photos, results, and notes go here</div>
+    </div>`;
+  track.appendChild(item);
+  io.observe(item);
+});
+
+/* ============ SIMULATION LOGIC ============ */
+const $ = id => document.getElementById(id);
+const tempSlider = $('tempSlider'), humSlider = $('humSlider'), soilSlider = $('soilSlider'),
+      pmSlider = $('pmSlider'), uvSlider = $('uvSlider'), vibSlider = $('vibSlider'), windSlider = $('windSlider');
+
+let abnormalStreak = 0; // simulates "repeated abnormal readings" requirement
+let lastAbnormalCount = 0;
+
+function label(val, low, mid, labels){
+  if(val < low) return labels[0];
+  if(val < mid) return labels[1];
+  return labels[2];
+}
+
+function updateSim(){
+  const temp = parseFloat(tempSlider.value);
+  const hum = parseFloat(humSlider.value);
+  const soil = parseFloat(soilSlider.value);
+  const pm = parseFloat(pmSlider.value);
+  const uv = parseFloat(uvSlider.value);
+  const vib = parseFloat(vibSlider.value);
+  const wind = parseFloat(windSlider.value);
+
+  $('tempVal').textContent = temp.toFixed(1)+' °C';
+  $('humVal').textContent = hum+'%';
+  $('soilVal').textContent = label(soil, 30, 65, ['Low','Moderate','High']);
+  $('pmVal').textContent = label(pm, 30, 65, ['Normal','Elevated','High']);
+  $('uvVal').textContent = label(uv, 30, 65, ['Low','Moderate','High']);
+  $('vibVal').textContent = label(vib, 30, 65, ['Normal','Unusual','Abnormal']);
+  $('windVal').textContent = label(wind, 30, 65, ['Calm','Breezy','Gusty']);
+
+  $('rTemp').textContent = temp.toFixed(1)+' °C';
+  $('rHum').textContent = hum+'%';
+  $('rSoil').textContent = label(soil, 30, 65, ['Low','Moderate','High']);
+  $('rPm').textContent = label(pm, 30, 65, ['Normal','Elevated','High']);
+  $('rVib').textContent = label(vib, 30, 65, ['Normal','Unusual','Abnormal']);
+
+  const battery = Math.max(20, Math.round(84 - (uv < 20 ? 10 : 0) - (wind > 80 ? 5 : 0)));
+  $('rBatt').textContent = battery + '%';
+  $('rSolar').textContent = uv > 15 ? 'Active' : 'Low light';
+
+  // risk scoring — several factors must combine, not just one
+  let score = 0;
+  let abnormalCount = 0;
+  if(temp > 32){ score += (temp-32)*1.6; abnormalCount++; }
+  if(hum < 35){ score += (35-hum)*1.1; abnormalCount++; }
+  if(soil < 30){ score += (30-soil)*0.8; abnormalCount++; }
+  if(pm > 55){ score += (pm-55)*0.7; abnormalCount++; }
+  if(vib > 55){ score += (vib-55)*0.9; abnormalCount++; }
+  if(uv > 75){ score += (uv-75)*0.4; }
+  if(wind > 70){ score += (wind-70)*0.3; }
+
+  // require repeated / combined abnormal signals before escalating to Red
+  if(abnormalCount >= 2) abnormalStreak = Math.min(abnormalStreak+1, 5);
+  else abnormalStreak = Math.max(abnormalStreak-1, 0);
+
+  let riskLevel, riskColor, riskMsg;
+  if(score < 25 || abnormalCount <= 1){
+    riskLevel='GREEN'; riskColor='#8FE9A0'; riskMsg='Low Risk. Conditions look normal.';
+  } else if(score < 55 && abnormalCount <= 2){
+    riskLevel='YELLOW'; riskColor='#F2A65A'; riskMsg='Moderate Risk. Keep monitoring this zone.';
+  } else if((score < 85 && abnormalCount <=3) || abnormalStreak < 3){
+    riskLevel='ORANGE'; riskColor='#E8622C'; riskMsg='Elevated Risk. Field inspection recommended.';
+  } else {
+    riskLevel='RED'; riskColor='#FF6B57'; riskMsg='High Risk. Multiple abnormal signals sustained — urgent human review recommended.';
+  }
+
+  const banner = $('riskBanner'), dot = $('riskDot'), text = $('riskText');
+  banner.style.background = riskColor + '22';
+  banner.style.color = riskColor;
+  dot.style.background = riskColor;
+  text.textContent = `${riskLevel} — ${riskMsg}`;
+
+  // update the sensor node pulse color + sentinel tree tint
+  document.getElementById('nodePulse').setAttribute('fill', riskColor);
+  document.getElementById('nodePulseRing').setAttribute('stroke', riskColor);
+  document.getElementById('sentinelTree').querySelector('circle').setAttribute('fill',
+    riskLevel==='GREEN' ? '#356A4E' : riskLevel==='YELLOW' ? '#5B6A3B' : riskLevel==='ORANGE' ? '#6B4A2E' : '#6B2E2E');
+
+  // serial monitor log (append occasionally)
+  logSerial(temp, hum, soil, pm, vib, riskLevel);
+}
+
+let serialCount = 0;
+function logSerial(temp,hum,soil,pm,vib,riskLevel){
+  serialCount++;
+  if(serialCount % 3 !== 0) return; // throttle log spam
+  const body = $('serialBody');
+  const line = document.createElement('div');
+  const t = new Date().toLocaleTimeString();
+  line.innerHTML = `<span class="dim">[${t}]</span> T:${temp.toFixed(1)}C H:${hum}% Soil:${soil} PM:${pm} Vib:${vib} → Risk:<strong>${riskLevel}</strong>`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+  while(body.children.length > 12) body.removeChild(body.firstChild);
+}
+
+[tempSlider,humSlider,soilSlider,pmSlider,uvSlider,vibSlider,windSlider].forEach(s=>{
+  s.addEventListener('input', updateSim);
+});
+updateSim();
+
+/* ============ FEEDBACK FORM (client-side only demo) ============ */
+document.getElementById('feedbackForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const status = document.getElementById('formStatus');
+  if(document.getElementById('fHoneypot').value !== ''){
+    return; // silently drop likely-spam submissions
+  }
+  status.textContent = "Thanks — your feedback has been received and will be reviewed by the FireWatch Sentinel team before anything is shared publicly.";
+  status.classList.add('show','ok');
+  this.reset();
+});
+
+function handleMiniForm(e){
+  e.preventDefault();
+  alert('Thanks for reaching out — connect this form to your email service or CRM to receive messages.');
+  return false;
+}
+</script>
+</body>
+</html>
