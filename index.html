@@ -223,7 +223,7 @@ section{position:relative; padding:110px 0;}
 }
 .team-card:hover::before{transform:scale(1.3);}
 .avatar-wrap{
-  width:88px; height:88px; border-radius:50%; margin-bottom:18px;
+  position:relative; width:88px; height:88px; border-radius:50%; margin-bottom:18px;
   background:linear-gradient(160deg, var(--lichen), var(--moss));
   display:flex; align-items:center; justify-content:center;
   box-shadow:inset 0 -6px 14px rgba(0,0,0,.12);
@@ -231,6 +231,7 @@ section{position:relative; padding:110px 0;}
 }
 .team-card:hover .avatar-wrap{transform:scale(1.06) rotate(3deg);}
 .avatar-wrap svg{width:100%; height:100%;}
+.avatar-photo{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:50%;}
 .team-card h3{font-size:1.18rem; margin-bottom:2px;}
 .role-tag{
   display:inline-block; font-family:var(--ff-mono); font-size:.72rem; font-weight:600;
@@ -769,37 +770,8 @@ input[type=range]::-moz-range-thumb{
       <!-- Card 1 -->
       <article class="card team-card reveal">
         <div class="avatar-wrap">
-          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#3A5A50"/><circle cx="50" cy="42" r="18" fill="#EFE0CB"/><path d="M50 20c-11 0-17 8-17 17 0 3 1 6 2 8 3-2 5-6 5-10 5 4 12 6 19 5 1 3 2 6 1 9 3-3 4-9 3-14-2-9-7-15-13-15z" fill="#2B2320"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#EFE0CB"/></svg>
-        </div>
-        <h3>Shoug Almutairi</h3>
-        <span class="role-tag">Team Leader · Software Developer</span>
-        <p class="bio">Chemical engineering student at SJSU with an interest in pharmaceutical and petroleum applications. Leads the technical direction of FireWatch Sentinel's sensing and dashboard logic.</p>
-        <div class="contribution"><strong>Main Contribution</strong>System design and prototype budget line items — translating sensor requirements into a working bill of materials and architecture.</div>
-        <div class="card-links">
-          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
-          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
-        </div>
-      </article>
-
-      <!-- Card 2 -->
-      <article class="card team-card reveal">
-        <div class="avatar-wrap">
-          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#4A6B5E"/><circle cx="50" cy="42" r="18" fill="#E3C7A6"/><path d="M32 38c0-12 8-20 18-20s18 8 18 20c0 2-6 4-6 2 0-10-6-14-12-14s-12 4-12 14c0 2-6 0-6-2z" fill="#241C16"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#E3C7A6"/></svg>
-        </div>
-        <h3>Adhithi Ramalingam</h3>
-        <span class="role-tag">Team Leader · Hardware Developer</span>
-        <p class="bio">Biomedical engineering student at UCI with a focus on medical devices. Brought the early insight into bioacoustics and keeps the team organized against the project timeline.</p>
-        <div class="contribution"><strong>Main Contribution</strong>Risk and concern analysis, plus research on the near- and long-term societal impact of the proposed innovation.</div>
-        <div class="card-links">
-          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
-          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
-        </div>
-      </article>
-
-      <!-- Card 3 -->
-      <article class="card team-card reveal">
-        <div class="avatar-wrap">
           <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#5B7A6B"/><circle cx="50" cy="42" r="18" fill="#EAD3B2"/><path d="M31 36c1-11 9-18 19-18s18 7 19 18c-4-4-11-6-19-6s-15 2-19 6z" fill="#171310"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#EAD3B2"/></svg>
+          <img class="avatar-photo" style="object-position:50% 15%" src="https://cdn.builder.io/api/v1/image/assets%2Ffefd55429b454bb39f319945586ae25c%2F5b3a453ffc5646f6b88e2f33045f442e?format=webp&width=800&height=1200" alt="Brandon Sweitzer">
         </div>
         <h3>Brandon Sweitzer</h3>
         <span class="role-tag">Team Leader · Business Manager</span>
@@ -811,20 +783,38 @@ input[type=range]::-moz-range-thumb{
         </div>
       </article>
 
-      <!-- Card 4 -->
+      <!-- Card 2 -->
       <article class="card team-card reveal">
         <div class="avatar-wrap">
-          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#3E5D52"/><circle cx="50" cy="42" r="18" fill="#F1DDBF"/><path d="M50 21c-12 0-19 9-19 19 0 4 1 7 3 9 1-6 3-11 6-13-1 4 0 8 3 11 0-5 2-9 5-11 1 4 4 7 7 8 2-3 3-7 2-11 3 2 4 6 4 9 2-2 3-6 3-9 0-10-7-19-14-19z" fill="#2A2019"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#F1DDBF"/></svg>
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#3A5A50"/></svg>
+          <img class="avatar-photo" src="https://cdn.builder.io/api/v1/image/assets%2Ffefd55429b454bb39f319945586ae25c%2F3f788c014c694935818e50942b038101" alt="Shoug Almutairi">
         </div>
-        <h3>Callissa Uccello</h3>
-        <span class="role-tag">Professional Outreach &amp; Firmware Research</span>
-        <p class="bio">Computer science student at CSULB with a bioinformatics focus. Leads subject-matter-expert outreach and researches firmware approaches for the ESP32 sensor node.</p>
-        <div class="contribution"><strong>Main Contribution</strong>Future goals and expected societal impact research, plus coordination of SME interviews that shaped the prototype.</div>
+        <h3>Shoug Almutairi</h3>
+        <span class="role-tag">Team Leader · Software Developer</span>
+        <p class="bio">Chemical engineering student at SJSU with an interest in pharmaceutical and petroleum applications. Leads the technical direction of FireWatch Sentinel's sensing and dashboard logic.</p>
+        <div class="contribution"><strong>Main Contribution</strong>System design and prototype budget line items — translating sensor requirements into a working bill of materials and architecture.</div>
         <div class="card-links">
           <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
           <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
         </div>
       </article>
+
+      <!-- Card 3 -->
+      <article class="card team-card reveal">
+        <div class="avatar-wrap">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#4A6B5E"/><circle cx="50" cy="42" r="18" fill="#E3C7A6"/><path d="M32 38c0-12 8-20 18-20s18 8 18 20c0 2-6 4-6 2 0-10-6-14-12-14s-12 4-12 14c0 2-6 0-6-2z" fill="#241C16"/><path d="M18 100c2-20 15-32 32-32s30 12 32 32z" fill="#E3C7A6"/></svg>
+          <img class="avatar-photo" src="https://cdn.builder.io/api/v1/image/assets%2Ffefd55429b454bb39f319945586ae25c%2F8a7c87c6437b439a9058a4c4a0fc40c4?format=webp&width=800&height=1200" alt="Adhithi Ramalingam">
+        </div>
+        <h3>Adhithi Ramalingam</h3>
+        <span class="role-tag">Team Leader · Hardware Developer</span>
+        <p class="bio">Biomedical engineering student at UCI with a focus on medical devices. Brought the early insight into bioacoustics and keeps the team organized against the project timeline.</p>
+        <div class="contribution"><strong>Main Contribution</strong>Risk and concern analysis, plus research on the near- and long-term societal impact of the proposed innovation.</div>
+        <div class="card-links">
+          <a href="#" class="icon-btn" onclick="return false;">✉ Email</a>
+          <a href="#" class="icon-btn" onclick="return false;">in LinkedIn</a>
+        </div>
+      </article>
+
     </div>
 
     <!-- Coaches -->
@@ -842,12 +832,12 @@ input[type=range]::-moz-range-thumb{
           <div><div class="coach-name">Sneha Ramaiah</div><div class="coach-role">Technical &amp; Competition Coach</div></div>
         </div>
         <div class="coach-card">
-          <div class="coach-avatar"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#F2A65A"/><circle cx="50" cy="44" r="17" fill="#E3C7A6"/><path d="M33 40c0-11 8-18 17-18s17 7 17 18c0 2-5 3-5 1 0-9-6-13-12-13s-12 4-12 13c0 2-5 1-5-1z" fill="#241C16"/></svg></div>
-          <div><div class="coach-name">Hector Castaneda</div><div class="coach-role">Team Organization Coach</div></div>
-        </div>
-        <div class="coach-card">
           <div class="coach-avatar"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#52796F"/><circle cx="50" cy="42" r="17" fill="#EFE0CB"/><path d="M50 23c-10 0-16 7-16 16 0 3 1 5 2 7 3-2 4-6 4-9 4 3 11 5 17 4 1 3 2 5 1 8 3-3 4-8 3-13-2-8-6-13-11-13z" fill="#2B2320"/></svg></div>
           <div><div class="coach-name">Sami Beaini</div><div class="coach-role">Pace &amp; Deadlines Coach</div></div>
+        </div>
+        <div class="coach-card">
+          <div class="coach-avatar"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#F2A65A"/><circle cx="50" cy="44" r="17" fill="#E3C7A6"/><path d="M33 40c0-11 8-18 17-18s17 7 17 18c0 2-5 3-5 1 0-9-6-13-12-13s-12 4-12 13c0 2-5 1-5-1z" fill="#241C16"/></svg></div>
+          <div><div class="coach-name">Hector Castaneda</div><div class="coach-role">Team Organization Coach</div></div>
         </div>
       </div>
     </div>
